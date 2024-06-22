@@ -299,6 +299,7 @@ int DirectoryEntry::anyOrigin() const
 std::vector<FileEntryPtr> DirectoryEntry::getFiles() const
 {
   std::vector<FileEntryPtr> result;
+  result.reserve(m_Files.size());
 
   for (auto iter = m_Files.begin(); iter != m_Files.end(); ++iter) {
     result.push_back(m_FileRegister->getFile(iter->second));
@@ -414,7 +415,7 @@ const FileEntryPtr DirectoryEntry::searchFile(const std::wstring& path,
 
     if (temp != nullptr) {
       if (len >= path.size()) {
-        log::error(QObject::tr("unexpected end of path").toStdString());
+        log::error("{}", QObject::tr("unexpected end of path"));
         return FileEntryPtr();
       }
 
@@ -905,7 +906,7 @@ void DirectoryEntry::dump(const std::wstring& file) const
     auto e       = _wfopen_s(&f, file.c_str(), L"wb");
 
     if (e != 0 || !f) {
-      throw DumpFailed(fmt::format("failed to open, {} ({})", std::strerror(e), e));
+      throw DumpFailed(std::format("failed to open, {} ({})", std::strerror(e), e));
     }
 
     Guard g([&] {
@@ -943,7 +944,7 @@ void DirectoryEntry::dump(std::FILE* f, const std::wstring& parentPath) const
 
       if (std::fwrite(lineu8.data(), lineu8.size(), 1, f) != 1) {
         const auto e = errno;
-        throw DumpFailed(fmt::format("failed to write, {} ({})", std::strerror(e), e));
+        throw DumpFailed(std::format("failed to write, {} ({})", std::strerror(e), e));
       }
     }
   }
